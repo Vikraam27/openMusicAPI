@@ -1,12 +1,14 @@
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../exceptions/InvariantError');
+const { mapDBToModel } = require('../utils');
 
 class MusicControllers {
   constructor() {
     this._pool = new Pool();
   }
 
+  // insert music into table musics
   async addMusic({
     title, year, performer, genre, duration,
   }) {
@@ -25,6 +27,12 @@ class MusicControllers {
     }
 
     return result.rows[0].id;
+  }
+
+  // select or get all data from musics table
+  async getAllMusics() {
+    const result = await this._pool.query('SELECT * FROM musics');
+    return result.rows.map(mapDBToModel);
   }
 }
 

@@ -6,8 +6,10 @@ class OpenMusicHandler {
     this._validator = validator;
 
     this.postMusicHandler = this.postMusicHandler.bind(this);
+    this.getAlltMusicHandler = this.getAlltMusicHandler.bind(this);
   }
 
+  // POST request add song
   async postMusicHandler(request, h) {
     try {
       this._validator.validateMusicModel(request.payload);
@@ -45,6 +47,17 @@ class OpenMusicHandler {
       return response;
     }
   }
-}
 
+  // GET request show all song
+  async getAlltMusicHandler() {
+    const songs = await this._service.getAllMusics();
+
+    return {
+      status: 'success',
+      data: {
+        songs,
+      },
+    };
+  }
+}
 module.exports = OpenMusicHandler;
