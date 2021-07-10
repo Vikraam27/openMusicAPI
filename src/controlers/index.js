@@ -67,6 +67,20 @@ class MusicControllers {
       throw new NotFoundError(`Lagu dengan id ${songId} tidak ditemukan, silahkan periksa kembali id lagu.`);
     }
   }
+
+  // delete music by id
+  async deleteMusic(songId) {
+    const query = {
+      text: 'DELETE FROM musics WHERE id = $1 RETURNING id',
+      values: [songId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError(`Lagu dengan id ${songId} tidak ditemukan, silahkan periksa kembali id lagu.`);
+    }
+  }
 }
 
 module.exports = MusicControllers;

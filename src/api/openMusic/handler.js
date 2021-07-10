@@ -8,7 +8,8 @@ class OpenMusicHandler {
     this.postMusicHandler = this.postMusicHandler.bind(this);
     this.getAllMusicHandler = this.getAllMusicHandler.bind(this);
     this.getMusicByIdHandler = this.getMusicByIdHandler.bind(this);
-    this.updatetMusicByIdHandler = this.updatetMusicByIdHandler.bind(this);
+    this.updateMusicByIdHandler = this.updateMusicByIdHandler.bind(this);
+    this.deleteMusicByIdHandler = this.deleteMusicByIdHandler.bind(this);
   }
 
   // POST request add song
@@ -93,7 +94,8 @@ class OpenMusicHandler {
     }
   }
 
-  async updatetMusicByIdHandler(request, h) {
+  // PUT request for updating song data by id
+  async updateMusicByIdHandler(request, h) {
     try {
       this._validator.validateMusicModel(request.payload);
       const { songId } = request.params;
@@ -112,6 +114,36 @@ class OpenMusicHandler {
         response.code(error.statusCode);
         return response;
       }
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      response.code(500);
+      console.error(error);
+      return response;
+    }
+  }
+
+  // DELETE request for deleting music by id
+  async deleteMusicByIdHandler(request, h) {
+    try {
+      const { songId } = request.params;
+      await this._service.deleteMusic(songId);
+
+      return {
+        status: 'success',
+        message: 'lagu berhasil dihapus',
+      };
+    } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
+      // Server ERROR!
       const response = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',
