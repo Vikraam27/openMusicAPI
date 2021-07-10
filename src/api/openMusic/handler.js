@@ -6,7 +6,8 @@ class OpenMusicHandler {
     this._validator = validator;
 
     this.postMusicHandler = this.postMusicHandler.bind(this);
-    this.getAlltMusicHandler = this.getAlltMusicHandler.bind(this);
+    this.getAllMusicHandler = this.getAllMusicHandler.bind(this);
+    this.getMusicByIdHandler = this.getMusicByIdHandler.bind(this);
   }
 
   // POST request add song
@@ -49,7 +50,7 @@ class OpenMusicHandler {
   }
 
   // GET request show all song
-  async getAlltMusicHandler() {
+  async getAllMusicHandler() {
     const songs = await this._service.getAllMusics();
 
     return {
@@ -58,6 +59,37 @@ class OpenMusicHandler {
         songs,
       },
     };
+  }
+
+  // GET request show music details by id
+  async getMusicByIdHandler(request, h) {
+    try {
+      const id = request.params;
+      const song = await this._service.getMusicDetails(id);
+
+      return {
+        status: 'success',
+        data: {
+          song,
+        },
+      };
+    } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      response.code(500);
+      console.error(error);
+      return response;
+    }
   }
 }
 module.exports = OpenMusicHandler;

@@ -1,7 +1,8 @@
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../exceptions/InvariantError');
-const { mapDBToModel } = require('../utils');
+const { mapData, mapDBToModel } = require('../utils');
+const NotFoundError = require('../exceptions/NotFoundError');
 
 class MusicControllers {
   constructor() {
@@ -32,7 +33,22 @@ class MusicControllers {
   // select or get all data from musics table
   async getAllMusics() {
     const result = await this._pool.query('SELECT * FROM musics');
-    return result.rows.map(mapDBToModel);
+    return result.rows.map(mapData);
+  }
+
+  // get music details
+  async getMusicDetails({ songId }) {
+    const query = {
+      text: 'SELECT * FROM musics WHERE id = $1',
+      values: [songId],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError(`Lagu dengan id ${songId} tidak ditemukan, silahkan periksa kembali id lagu.`);
+    }
+
+    return result.rows.map(mapDBToModel)[0];
   }
 }
 
