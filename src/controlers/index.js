@@ -37,7 +37,7 @@ class MusicControllers {
   }
 
   // get music details
-  async getMusicDetails({ songId }) {
+  async getMusicDetails(songId) {
     const query = {
       text: 'SELECT * FROM musics WHERE id = $1',
       values: [songId],
@@ -49,6 +49,23 @@ class MusicControllers {
     }
 
     return result.rows.map(mapDBToModel)[0];
+  }
+
+  // update music by id
+  async updateMusic(songId, {
+    title, year, performer, genre, duration,
+  }) {
+    const updatedAt = new Date().toISOString();
+    const query = {
+      text: 'UPDATE musics SET title = $1, year = $2, performer = $3, genre = $4, duration = $5, updated_at = $6 WHERE id = $7 RETURNING id',
+      values: [title, year, performer, genre, duration, updatedAt, songId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError(`Lagu dengan id ${songId} tidak ditemukan, silahkan periksa kembali id lagu.`);
+    }
   }
 }
 
