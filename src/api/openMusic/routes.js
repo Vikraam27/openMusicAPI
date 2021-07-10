@@ -7,7 +7,12 @@ const routes = (handler) => [
   {
     method: 'GET',
     path: '/songs',
-    handler: handler.getAlltMusicHandler,
+    handler: handler.getAllMusicHandler,
+  },
+  {
+    method: 'GET',
+    path: '/songs/{songId}',
+    handler: handler.getMusicByIdHandler,
   },
 ];
 
