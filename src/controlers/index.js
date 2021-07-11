@@ -31,7 +31,28 @@ class MusicControllers {
   }
 
   // select or get all data from musics table
-  async getAllMusics() {
+  async getAllMusics({ song, performer }) {
+    // for searching song
+    if (song) {
+      const val = song.toLowerCase();
+      const query = {
+        text: "SELECT * FROM musics WHERE LOWER(title) LIKE '%' || $1 || '%'",
+        values: [val],
+      };
+      const result = await this._pool.query(query);
+      return result.rows.map(mapData);
+    }
+    // for searching performer
+    if (performer) {
+      const val = performer.toLowerCase();
+      const query = {
+        text: "SELECT * FROM musics WHERE LOWER(performer) LIKE '%' || $1 || '%'",
+        values: [val],
+      };
+      const result = await this._pool.query(query);
+      return result.rows.map(mapData);
+    }
+
     const result = await this._pool.query('SELECT * FROM musics');
     return result.rows.map(mapData);
   }

@@ -52,15 +52,19 @@ class OpenMusicHandler {
   }
 
   // GET request show all song
-  async getAllMusicHandler() {
-    const songs = await this._service.getAllMusics();
+  async getAllMusicHandler(request) {
+    try {
+      const songs = await this._service.getAllMusics(request.query);
 
-    return {
-      status: 'success',
-      data: {
-        songs,
-      },
-    };
+      return {
+        status: 'success',
+        data: {
+          songs,
+        },
+      };
+    } catch (error) {
+      return error;
+    }
   }
 
   // GET request show music details by id
