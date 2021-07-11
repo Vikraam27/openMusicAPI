@@ -1,8 +1,9 @@
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../exceptions/InvariantError');
-const { mapData, mapDBToModel } = require('../utils');
+const { mapDBToModel } = require('../utils');
 const NotFoundError = require('../exceptions/NotFoundError');
+const search = require('../utils/searchHandler');
 
 class MusicControllers {
   constructor() {
@@ -34,27 +35,19 @@ class MusicControllers {
   async getAllMusics({ song, performer }) {
     // for searching song
     if (song) {
-      const val = song.toLowerCase();
-      const query = {
-        text: "SELECT * FROM musics WHERE LOWER(title) LIKE '%' || $1 || '%'",
-        values: [val],
-      };
-      const result = await this._pool.query(query);
-      return result.rows.map(mapData);
+      const reqeust = search(song, 'title');
+      const result = await this._pool.query(reqeust);
+      return result.rows;
     }
     // for searching performer
     if (performer) {
-      const val = performer.toLowerCase();
-      const query = {
-        text: "SELECT * FROM musics WHERE LOWER(performer) LIKE '%' || $1 || '%'",
-        values: [val],
-      };
-      const result = await this._pool.query(query);
-      return result.rows.map(mapData);
+      const request = search(performer, 'performer');
+      const result = await this._pool.query(request);
+      return result.rows;
     }
 
-    const result = await this._pool.query('SELECT * FROM musics');
-    return result.rows.map(mapData);
+    const result = await this._pool.query('SELECT id, title, performer FROM musics');
+    return result.rows;
   }
 
   // get music details
