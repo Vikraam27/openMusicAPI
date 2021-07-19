@@ -16,11 +16,10 @@ class MusicControllers {
   }) {
     const id = `song-${nanoid(8)}`;
     const createdAt = new Date().toISOString();
-    const updatedAt = createdAt;
 
     const query = {
-      text: 'INSERT INTO musics VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
-      values: [id, title, year, performer, genre, duration, createdAt, updatedAt],
+      text: 'INSERT INTO musics VALUES($1, $2, $3, $4, $5, $6, $7, $7) RETURNING id',
+      values: [id, title, year, performer, genre, duration, createdAt],
     };
 
     const result = await this._pool.query(query);
