@@ -1,8 +1,9 @@
 const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
-const { hash } = require('bcrypt');
+const { hash, compare } = require('bcrypt');
 const publicIp = require('public-ip');
 const InvariantError = require('../exceptions/InvariantError');
+const AuthenticationError = require('../exceptions/AuthenticationError');
 
 class UserControllers {
   constructor() {
@@ -41,6 +42,27 @@ class UserControllers {
     if (result.rows.length > 0) {
       throw new InvariantError('username already exists');
     }
+  }
+
+  async verifyUserCredential(username, password) {
+    const query = {
+      text: 'SELECT id, password FROM users WHERE username = $1',
+      values: [username],
+    };
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new AuthenticationError('invalid username');
+    }
+
+    const { id, password: hashedPassword } = result.rows[0];
+
+    const match = await compare(password, hashedPassword);
+
+    if (!match) {
+      throw new AuthenticationError('invalid password');
+    }
+    return id;
   }
 }
 
