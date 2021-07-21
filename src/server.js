@@ -3,7 +3,7 @@ require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const openMusic = require('./api/openMusic');
 const OpenMusicService = require('./controllers/musicController');
-const MusicValidator = require('./validator');
+const MusicValidator = require('./validator/music');
 
 // error handler
 const ClientError = require('./exceptions/ClientError');

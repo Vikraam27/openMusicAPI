@@ -1,4 +1,4 @@
-const InvariantError = require('../exceptions/InvariantError');
+const InvariantError = require('../../exceptions/InvariantError');
 const { OpenMusicModels } = require('./models');
 
 const MusicValidator = {
