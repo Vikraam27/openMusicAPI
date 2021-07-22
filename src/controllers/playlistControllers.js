@@ -1,5 +1,6 @@
 const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
+const InvariantError = require('../exceptions/InvariantError');
 
 class PlaylistsControllers {
   constructor() {
@@ -14,8 +15,21 @@ class PlaylistsControllers {
     };
 
     const result = await this._pool.query(query);
+    if (!result.rows[0].id) {
+      throw new InvariantError('failed adding playlist');
+    }
 
     return result.rows[0].id;
+  }
+
+  async getAllMyPlaylists(owner) {
+    const query = {
+      text: 'SELECT playlists.id, playlists.name, users.username FROM playlists FULL OUTER JOIN users ON users.id = playlists.owner WHERE playlists.owner = $1',
+      values: [owner],
+    };
+
+    const result = await this._pool.query(query);
+    return result.rows;
   }
 }
 

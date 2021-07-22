@@ -3,10 +3,11 @@ class PlaylistHandler {
     this._service = service;
     this._validator = validator;
 
-    this.createPlaylistHalder = this.createPlaylistHalder.bind(this);
+    this.createPlaylistHanlder = this.createPlaylistHanlder.bind(this);
+    this.getAllPlaylistHanlder = this.getAllPlaylistHanlder.bind(this);
   }
 
-  async createPlaylistHalder(request, h) {
+  async createPlaylistHanlder(request, h) {
     try {
       this._validator.validatePlaylistsModels(request.payload);
       const { name } = request.payload;
@@ -23,6 +24,22 @@ class PlaylistHandler {
       });
       response.code(201);
       return response;
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
+  }
+
+  async getAllPlaylistHanlder(request) {
+    try {
+      const { id: credentialId } = request.auth.credentials;
+      const playlists = await this._service.getAllMyPlaylists(credentialId);
+      return {
+        status: 'success',
+        data: {
+          playlists,
+        },
+      };
     } catch (error) {
       console.log(error);
       return error;
