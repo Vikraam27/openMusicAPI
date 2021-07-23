@@ -4,4 +4,8 @@ const PlaylistsModels = Joi.object({
   name: Joi.string().required(),
 });
 
-module.exports = { PlaylistsModels };
+const PlaylistsSongModels = Joi.object({
+  songId: Joi.string().required(),
+});
+
+module.exports = { PlaylistsModels, PlaylistsSongModels };
