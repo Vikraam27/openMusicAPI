@@ -53,14 +53,14 @@ class PlaylistHandler {
       const { id: credentialId } = request.auth.credentials;
       const { playlistId } = request.params;
       await this._service.verifyPlaylistOwner(credentialId, playlistId);
-      await this._service.deletePlaylist(playlistId);
 
+      await this._service.verifyPlaylistAccess(credentialId, playlistId);
+      await this._service.deletePlaylist(playlistId);
       return {
         status: 'success',
         message: 'Playlist berhasil dihapus',
       };
     } catch (error) {
-      console.log(error);
       return error;
     }
   }
@@ -72,7 +72,7 @@ class PlaylistHandler {
       const { playlistId } = request.params;
       const { songId } = request.payload;
 
-      await this._service.verifyPlaylistOwner(credentialId, playlistId);
+      await this._service.verifyPlaylistAccess(credentialId, playlistId);
       await this._service.verifySongId(songId);
 
       await this._service.addSongToPlaylists(songId, playlistId);
@@ -92,7 +92,7 @@ class PlaylistHandler {
       const { id: credentialId } = request.auth.credentials;
       const { playlistId } = request.params;
 
-      await this._service.verifyPlaylistOwner(credentialId, playlistId);
+      await this._service.verifyPlaylistAccess(credentialId, playlistId);
       const songs = await this._service.getSongInPlaylists(credentialId, playlistId);
 
       return {
@@ -114,7 +114,7 @@ class PlaylistHandler {
       const { playlistId } = request.params;
       const { songId } = request.payload;
 
-      await this._service.verifyPlaylistOwner(credentialId, playlistId);
+      await this._service.verifyPlaylistAccess(credentialId, playlistId);
 
       await this._service.deleteSongInPlaylists(playlistId, songId);
 
@@ -123,7 +123,6 @@ class PlaylistHandler {
         message: 'Lagu berhasil dihapus dari playlist',
       };
     } catch (error) {
-      console.log(error);
       return error;
     }
   }

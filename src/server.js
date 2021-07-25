@@ -25,14 +25,20 @@ const playlists = require('./api/playlists');
 const PlaylistsControllers = require('./controllers/playlistControllers');
 const PlaylistsValidator = require('./validator/playlists');
 
+// collaborations
+const collaborations = require('./api/collaborations');
+const CollaborationsControllers = require('./controllers/collaborationsControllers');
+const CollaborationsValidator = require('./validator/collaborations');
+
 // error handler
 const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
+  const collaborationsControllers = new CollaborationsControllers();
   const musicControllers = new MusicControllers();
   const userControllers = new UserControllers();
   const authenticationsControllers = new AuthenticationsControllers();
-  const playlistsControllers = new PlaylistsControllers();
+  const playlistsControllers = new PlaylistsControllers(collaborationsControllers);
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -94,6 +100,14 @@ const init = async () => {
       options: {
         service: playlistsControllers,
         validator: PlaylistsValidator,
+      },
+    },
+    {
+      plugin: collaborations,
+      options: {
+        collaborationControllers: collaborationsControllers,
+        playlistsControllers,
+        validator: CollaborationsValidator,
       },
     },
   ]);

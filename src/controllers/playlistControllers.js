@@ -5,8 +5,9 @@ const InvariantError = require('../exceptions/InvariantError');
 const NotFoundError = require('../exceptions/NotFoundError');
 
 class PlaylistsControllers {
-  constructor() {
+  constructor(collaborationControllers) {
     this._pool = new Pool();
+    this._collaborationControllers = collaborationControllers;
   }
 
   async createPlaylist(name, owner) {
@@ -28,9 +29,11 @@ class PlaylistsControllers {
     const query = {
       text: `SELECT playlists.id, playlists.name, users.username 
         FROM playlists 
-        FULL OUTER JOIN users 
-        ON users.id = playlists.owner
-        WHERE playlists.owner = $1`,
+        LEFT JOIN users 
+        ON playlists.owner = users.id
+        LEFT JOIN collaborations
+        ON collaborations.playlist_id = playlists.id
+        WHERE playlists.owner = $1 OR collaborations.user_id = $1`,
       values: [owner],
     };
 
@@ -47,7 +50,7 @@ class PlaylistsControllers {
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
-      throw new NotFoundError(`failed delete playlist, id ${playlistId} not found`);
+      throw new NotFoundError(`Lagu dengan id ${playlistId} tidak ditemukan, silahkan periksa kembali id lagu.`);
     }
   }
 
@@ -58,8 +61,7 @@ class PlaylistsControllers {
     };
 
     const result = await this._pool.query(query);
-
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError(`failed delete playlist, id ${playlistId} not found`);
     }
 
@@ -102,7 +104,8 @@ class PlaylistsControllers {
       text: `SELECT musics.id, musics.title, musics.performer FROM musics 
       LEFT JOIN playlists_songs ON playlists_songs.song_id = musics.id
       LEFT JOIN playlists ON playlists.id = playlists_songs.playlists_id
-      WHERE playlists.owner = $1 AND playlists.id = $2`,
+      LEFT JOIN collaborations ON collaborations.playlist_id = playlists_songs.playlists_id
+      WHERE playlists.owner = $1 OR collaborations.user_id = $1 AND playlists.id = $2`,
       values: [owner, playlistId],
     };
 
@@ -116,11 +119,25 @@ class PlaylistsControllers {
       text: 'DELETE FROM playlists_songs WHERE playlists_id = $1 AND song_id = $2 RETURNING id',
       values: [playlistId, songId],
     };
-
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
       throw new InvariantError('failed delete song, id not found');
+    }
+  }
+
+  async verifyPlaylistAccess(userId, playlistId) {
+    try {
+      await this.verifyPlaylistOwner(userId, playlistId);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      try {
+        await this._collaborationControllers.verifyCollaboration(userId, playlistId);
+      } catch {
+        throw error;
+      }
     }
   }
 }

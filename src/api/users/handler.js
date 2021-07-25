@@ -24,7 +24,6 @@ class UsersHandler {
       response.code(201);
       return response;
     } catch (error) {
-      console.log(error);
       return error;
     }
   }
