@@ -21,7 +21,7 @@ class AuthenticationsHandler {
       const refreshToken = this._tokenManager.generateRefreshToken({ id });
 
       await this._authenticationsControllers.addRefreshToken(refreshToken);
-
+      h.state('JWT', accessToken);
       const response = h.response({
         status: 'success',
         message: 'Authentication berhasil ditambahkan',
@@ -37,7 +37,7 @@ class AuthenticationsHandler {
     }
   }
 
-  async putAuthenticationHandler(request) {
+  async putAuthenticationHandler(request, h) {
     try {
       this._validator.validatePutAuthenticationModels(request.payload);
 
@@ -46,6 +46,7 @@ class AuthenticationsHandler {
       const { id } = this._tokenManager.verifyRefreshToken(refreshToken);
 
       const accessToken = this._tokenManager.generateAccessToken({ id });
+      h.state('JWT', accessToken);
       return {
         status: 'success',
         message: 'Access Token berhasil diperbarui',

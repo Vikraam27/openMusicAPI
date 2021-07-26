@@ -64,6 +64,32 @@ class UserControllers {
     }
     return id;
   }
+
+  async getUser(id) {
+    const query = {
+      text: 'SELECT id, username, fullname, created_at FROM users WHERE id = $1',
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new InvariantError('user not found');
+    }
+
+    return result.rows[0];
+  }
+
+  async searchUsername(username) {
+    const query = {
+      text: 'SELECT username FROM users WHERE LOWER(username) LIKE \'%\' || $1 || \'%\' LIMIT 2',
+      values: [username.toLowerCase()],
+    };
+
+    const result = await this._pool.query(query);
+
+    return result.rows;
+  }
 }
 
 module.exports = UserControllers;
