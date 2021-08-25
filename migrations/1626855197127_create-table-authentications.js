@@ -10,10 +10,6 @@ exports.up = (pgm) => {
       type: 'TEXT',
       notNull: true,
     },
-    created_by: {
-      type: 'INET',
-      notNull: 'true',
-    },
   });
 };
 

@@ -34,8 +34,8 @@ class MusicControllers {
   async getAllMusics({ song, performer }) {
     // for searching song
     if (song) {
-      const reqeust = search(song, 'title');
-      const result = await this._pool.query(reqeust);
+      const request = search(song, 'title');
+      const result = await this._pool.query(request);
       return result.rows;
     }
     // for searching performer

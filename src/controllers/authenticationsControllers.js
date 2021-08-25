@@ -1,5 +1,4 @@
 const { Pool } = require('pg');
-const publicIp = require('public-ip');
 const InvariantError = require('../exceptions/InvariantError');
 
 class AuthenticationsControllers {
@@ -9,11 +8,10 @@ class AuthenticationsControllers {
 
   async addRefreshToken(token) {
     const createdAt = new Date().toISOString();
-    const userIpAddress = await publicIp.v4();
 
     const query = {
-      text: 'INSERT INTO authentications VALUES($1, $2, $3)',
-      values: [token, createdAt, userIpAddress],
+      text: 'INSERT INTO authentications VALUES($1, $2)',
+      values: [token, createdAt],
     };
 
     await this._pool.query(query);

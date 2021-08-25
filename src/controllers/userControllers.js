@@ -1,7 +1,6 @@
 const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
 const { hash, compare } = require('bcrypt');
-const publicIp = require('public-ip');
 const InvariantError = require('../exceptions/InvariantError');
 const AuthenticationError = require('../exceptions/AuthenticationError');
 
@@ -16,11 +15,10 @@ class UserControllers {
     const userId = `user-${nanoid(10)}`;
     const hashPassword = await hash(password, 10);
     const createdAt = new Date().toISOString();
-    const userIpAddress = await publicIp.v4();
 
     const query = {
-      text: 'INSERT INTO users VALUES($1, $2, $3, $4, $5, $6) RETURNING id',
-      values: [userId, username, hashPassword, fullname, createdAt, userIpAddress],
+      text: 'INSERT INTO users VALUES($1, $2, $3, $4, $5) RETURNING id',
+      values: [userId, username, hashPassword, fullname, createdAt],
     };
 
     const result = await this._pool.query(query);

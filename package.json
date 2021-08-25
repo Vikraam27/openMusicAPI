@@ -1,6 +1,6 @@
 {
   "name": "open-music-api",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -21,12 +21,12 @@
   "dependencies": {
     "@hapi/hapi": "^20.1.0",
     "@hapi/jwt": "^2.0.1",
+    "amqplib": "^0.8.0",
     "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",
     "joi": "^17.4.0",
     "nanoid": "^3.1.20",
     "node-pg-migrate": "^5.10.0",
-    "pg": "^8.6.0",
-    "public-ip": "^4.0.4"
+    "pg": "^8.6.0"
   }
 }
