@@ -30,6 +30,11 @@ const collaborations = require('./api/collaborations');
 const CollaborationsControllers = require('./controllers/collaborationsControllers');
 const CollaborationsValidator = require('./validator/collaborations');
 
+// exports
+const _exports = require('./api/exports');
+const ProducerControllers = require('./controllers/rabbitmq/ProducerControllers');
+const ExportsValidator = require('./validator/exports');
+
 // error handler
 const ClientError = require('./exceptions/ClientError');
 
@@ -108,6 +113,14 @@ const init = async () => {
         collaborationControllers: collaborationsControllers,
         playlistsControllers,
         validator: CollaborationsValidator,
+      },
+    },
+    {
+      plugin: _exports,
+      options: {
+        service: ProducerControllers,
+        validator: ExportsValidator,
+        playlistsControllers,
       },
     },
   ]);
