@@ -3,8 +3,9 @@ const { Pool } = require('pg');
 const InvariantError = require('../exceptions/InvariantError');
 
 class CollaborationsControllers {
-  constructor() {
+  constructor(cacheControllers) {
     this._pool = new Pool();
+    this._cacheControllers = cacheControllers;
   }
 
   async addCollaboration(userId, playlistId) {
@@ -20,7 +21,7 @@ class CollaborationsControllers {
     if (!result.rows.length) {
       throw new InvariantError('failed add collaboration');
     }
-
+    await this._cacheControllers.delete(`playlist-song:${playlistId}`);
     return result.rows[0].collaboration_id;
   }
 
@@ -35,6 +36,7 @@ class CollaborationsControllers {
     if (!result.rows.length) {
       throw new InvariantError('failed to delete playlist');
     }
+    await this._cacheControllers.delete(`playlist-song:${playlistId}`);
   }
 
   async verifyCollaboration(userId, playlistId) {

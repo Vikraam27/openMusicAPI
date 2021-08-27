@@ -5,8 +5,9 @@ class CacheControllers {
     this._client = redis.createClient({
       host: process.env.REDIS_SERVER,
     });
+
     this._client.on('error', (error) => {
-      console.error(error);
+      throw error;
     });
   }
 
@@ -16,6 +17,7 @@ class CacheControllers {
         if (error) {
           return reject(error);
         }
+
         return resolve(ok);
       });
     });
@@ -27,9 +29,11 @@ class CacheControllers {
         if (error) {
           return reject(error);
         }
+
         if (reply === null) {
-          return reject(new Error('Cache tidak ditemukan'));
+          return reject(new Error('Nilai tidak ditemukan'));
         }
+
         return resolve(reply.toString());
       });
     });
@@ -41,6 +45,7 @@ class CacheControllers {
         if (error) {
           return reject(error);
         }
+
         return resolve(count);
       });
     });

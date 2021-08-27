@@ -5,9 +5,10 @@ const InvariantError = require('../exceptions/InvariantError');
 const NotFoundError = require('../exceptions/NotFoundError');
 
 class PlaylistsControllers {
-  constructor(collaborationControllers) {
+  constructor(collaborationControllers, cacheControllers) {
     this._pool = new Pool();
     this._collaborationControllers = collaborationControllers;
+    this._cacheControllers = cacheControllers;
   }
 
   async createPlaylist(name, owner) {
@@ -97,21 +98,29 @@ class PlaylistsControllers {
     if (!result.rows.length) {
       throw new InvariantError('failed to add song to playlist');
     }
+    await this._cacheControllers.delete(`playlist-song:${playlistId}`);
   }
 
   async getSongInPlaylists(owner, playlistId) {
-    const query = {
-      text: `SELECT musics.id, musics.title, musics.performer FROM musics 
-      LEFT JOIN playlists_songs ON playlists_songs.song_id = musics.id
-      LEFT JOIN playlists ON playlists.id = playlists_songs.playlists_id
-      LEFT JOIN collaborations ON collaborations.playlist_id = playlists_songs.playlists_id
-      WHERE playlists.owner = $1 OR collaborations.user_id = $1 AND playlists.id = $2`,
-      values: [owner, playlistId],
-    };
+    try {
+      const request = await this._cacheControllers.get(`playlist-song:${playlistId}`);
+      return JSON.parse(request);
+    } catch {
+      const query = {
+        text: `SELECT musics.id, musics.title, musics.performer FROM musics 
+        LEFT JOIN playlists_songs ON playlists_songs.song_id = musics.id
+        LEFT JOIN playlists ON playlists.id = playlists_songs.playlists_id
+        LEFT JOIN collaborations ON collaborations.playlist_id = playlists_songs.playlists_id
+        WHERE playlists.owner = $1 OR collaborations.user_id = $1 AND playlists.id = $2`,
+        values: [owner, playlistId],
+      };
 
-    const result = await this._pool.query(query);
+      const result = await this._pool.query(query);
 
-    return result.rows;
+      await this._cacheControllers.set(`playlist-song:${playlistId}`, JSON.stringify(result));
+
+      return result.rows;
+    }
   }
 
   async deleteSongInPlaylists(playlistId, songId) {
@@ -124,6 +133,7 @@ class PlaylistsControllers {
     if (!result.rows.length) {
       throw new InvariantError('failed delete song, id not found');
     }
+    await this._cacheControllers.delete(`playlist-song:${playlistId}`);
   }
 
   async verifyPlaylistAccess(userId, playlistId) {

@@ -42,15 +42,20 @@ const uploads = require('./api/uploads');
 const StorageService = require('./controllers/storage/StorageControllers');
 const UploadsValidator = require('./validator/uploads');
 
+// cache
+const CacheControllers = require('./controllers/redis/CacheControllers');
+
 // error handler
 const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
-  const collaborationsControllers = new CollaborationsControllers();
+  const cacheControllers = new CacheControllers();
+  const collaborationsControllers = new CollaborationsControllers(cacheControllers);
   const musicControllers = new MusicControllers();
   const userControllers = new UserControllers();
   const authenticationsControllers = new AuthenticationsControllers();
-  const playlistsControllers = new PlaylistsControllers(collaborationsControllers);
+  // eslint-disable-next-line max-len
+  const playlistsControllers = new PlaylistsControllers(collaborationsControllers, cacheControllers);
   const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/file/images'));
 
   const server = Hapi.server({
